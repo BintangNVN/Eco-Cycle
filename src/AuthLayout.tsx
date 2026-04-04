@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 
 type AuthLayoutProps = {
-  pageLabel: string;
+  pageLabel?: string;
   children: ReactNode;
 };
 
-/** Shared shell: dark background, page label, split card (visual + form). */
+/** Shared shell: clean white background + split card (visual + form). */
 export default function AuthLayout({ pageLabel, children }: AuthLayoutProps) {
   return (
     <div className="auth-screen">
       <div className="auth-screen__inner">
-        <p className="auth-page-label">{pageLabel}</p>
+        {pageLabel ? <p className="auth-page-label">{pageLabel}</p> : null}
         <div className="auth-card">
           <div className="auth-card__visual" aria-hidden="true" />
           <div className="auth-card__panel">{children}</div>

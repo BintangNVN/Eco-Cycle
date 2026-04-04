@@ -1,5 +1,5 @@
 import { FormEvent, useId, useState } from "react";
-import "./App.css";
+import "./css/login.css";
 import { login } from "./api";
 import AuthLayout, { AuthEcoLogo, GoogleIcon } from "./AuthLayout";
 import PasswordField from "./PasswordField";
@@ -10,7 +10,11 @@ type LoginProps = {
   onForgotPassword: () => void;
 };
 
-export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPassword }: LoginProps) {
+export default function Login({
+  onSwitchToRegister,
+  onLoginSuccess,
+  onForgotPassword,
+}: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -25,19 +29,29 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPass
 
     try {
       const response = await login(email, password);
-      const token = response.data?.token;
+      const token = response.data?.data?.token;
 
       if (!token) {
-        throw new Error("Token tidak ditemukan dalam respons API");
+        throw new Error("Token tidak ditemukan dalam response API");
       }
 
       if (remember) {
-        window.localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_token", token);
+        sessionStorage.removeItem("auth_token");
+      } else {
+        sessionStorage.setItem("auth_token", token);
+        localStorage.removeItem("auth_token");
       }
 
       onLoginSuccess(token);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch (err: any) {
+      // ambil error dari backend kalau ada
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login gagal";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +72,7 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPass
             id={emailId}
             className="auth-field__input"
             type="email"
-            placeholder="reyla@gmail.com"
+            placeholder="administrator@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -71,7 +85,7 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPass
           value={password}
           onChange={setPassword}
           required
-          minLength={8}
+          minLength={6}
           autoComplete="current-password"
         />
 
@@ -84,18 +98,27 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPass
             />
             <span>Remember me</span>
           </label>
-          <button type="button" className="auth-link" onClick={onForgotPassword}>
+
+          <button
+            type="button"
+            className="auth-link"
+            onClick={onForgotPassword}
+          >
             Forgot Password
           </button>
         </div>
 
-        {error ? <p className="auth-error">{error}</p> : null}
+        {error && <p className="auth-error">{error}</p>}
 
-        <button className="auth-btn-primary" type="submit" disabled={loading}>
+        <button
+          className="auth-btn-primary"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Signing in…" : "Sign In"}
         </button>
 
-        <button type="button" className="auth-btn-google" onClick={() => {}}>
+        <button type="button" className="auth-btn-google">
           <GoogleIcon />
           Sign in with Google
         </button>
@@ -103,7 +126,11 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onForgotPass
 
       <p className="auth-footer-text">
         Don&apos;t have an account?{" "}
-        <button type="button" className="auth-link-inline" onClick={onSwitchToRegister}>
+        <button
+          type="button"
+          className="auth-link-inline"
+          onClick={onSwitchToRegister}
+        >
           Sign Up
         </button>
       </p>

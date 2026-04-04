@@ -1,7 +1,8 @@
 import { FormEvent, useId, useState } from "react";
-import "./App.css";
+import "./css/forgot-password.css";
 import AuthLayout, { AuthEcoLogo } from "./AuthLayout";
 import PasswordField from "./PasswordField";
+import { resetPassword } from "./api";
 
 type ForgotPasswordProps = {
   onBackToLogin: () => void;
@@ -11,15 +12,30 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const emailId = useId();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: reset password API
-    console.log({ email, password });
+
+    setError(null);
+    setLoading(true);
+    try {
+      // Di app ini, halaman "lupa password" digunakan sebagai "reset password"
+      // (email + password baru).
+      await resetPassword({ email, password });
+      onBackToLogin();
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || err?.message || "Reset password gagal";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthLayout pageLabel="Forgot Password">
+    <AuthLayout>
       <AuthEcoLogo />
       <h1 className="auth-title">Reset Your Password</h1>
       <p className="auth-subtitle">
@@ -51,9 +67,11 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
         />
 
         <button className="auth-btn-primary" type="submit">
-          Reset Password
+          {loading ? "Resetting..." : "Reset Password"}
         </button>
       </form>
+
+      {error && <p className="auth-error">{error}</p>}
 
       <p className="auth-footer-text">
         <button type="button" className="auth-link-inline" onClick={onBackToLogin}>

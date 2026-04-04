@@ -1,28 +1,66 @@
 import { FormEvent, useId, useState } from "react";
-import "./App.css";
+import "./css/register.css";
+import { login, register } from "./api";
 import AuthLayout, { AuthEcoLogo, GoogleIcon } from "./AuthLayout";
 import PasswordField from "./PasswordField";
 
 type RegisterProps = {
   onSwitchToLogin: () => void;
+  onRegisterSuccess: () => void;
 };
 
-export default function Register({ onSwitchToLogin }: RegisterProps) {
-  const [username, setUsername] = useState("");
+export default function Register({ onSwitchToLogin, onRegisterSuccess }: RegisterProps) {
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const usernameId = useId();
-  const emailId = useId();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const nameId = useId();
+  const emailId = useId();
+  const phoneId = useId();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
+
+    // validasi password
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
-    // TODO: Implement register logic
-    console.log({ username, email, password });
+
+    setLoading(true);
+    try {
+      // ✅ REGISTER SESUAI API
+      await register({
+        name,
+        email,
+        password,
+        phoneNumber,
+      });
+
+      // tampilkan popup sukses dan arahkan ke login
+      window.alert("Pendaftaran berhasil. Silakan login di halaman Login.");
+      setSuccess("Pendaftaran berhasil. Silakan login.");
+      setError(null);
+      onRegisterSuccess();
+    } catch (err: any) {
+      console.log(err.response?.data); // debug
+
+      const message =
+        err?.response?.data?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Register gagal. Silakan coba lagi.";
+
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,19 +73,33 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
       </p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
-        <label className="auth-field" htmlFor={usernameId}>
-          <span className="auth-field__label">Username</span>
+        {/* ✅ NAME */}
+        <label className="auth-field" htmlFor={nameId}>
+          <span className="auth-field__label">Name</span>
           <input
-            id={usernameId}
+            id={nameId}
             className="auth-field__input"
-            placeholder="rayhan_kf"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
+            placeholder="Bintang"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </label>
 
+        {/* ✅ PHONE NUMBER */}
+        <label className="auth-field" htmlFor={phoneId}>
+          <span className="auth-field__label">Phone Number</span>
+          <input
+            id={phoneId}
+            className="auth-field__input"
+            placeholder="08123456789"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            required
+          />
+        </label>
+
+        {/* EMAIL */}
         <label className="auth-field" htmlFor={emailId}>
           <span className="auth-field__label">Email</span>
           <input
@@ -57,37 +109,41 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
             required
           />
         </label>
 
+        {/* PASSWORD */}
         <PasswordField
           label="Password"
           value={password}
           onChange={setPassword}
           required
-          minLength={8}
+          minLength={6}
           autoComplete="new-password"
         />
 
+        {/* CONFIRM PASSWORD */}
         <PasswordField
           label="Confirm Password"
           value={confirmPassword}
           onChange={setConfirmPassword}
           required
-          minLength={8}
+          minLength={6}
           autoComplete="new-password"
         />
 
-        <button className="auth-btn-primary" type="submit">
-          Sign Up
+        <button className="auth-btn-primary" type="submit" disabled={loading}>
+          {loading ? "Signing up…" : "Sign Up"}
         </button>
 
-        <button type="button" className="auth-btn-google" onClick={() => {}}>
+        <button type="button" className="auth-btn-google">
           <GoogleIcon />
           Sign in with Google
         </button>
+
+        {success && <p className="auth-success">{success}</p>}
+        {error && <p className="auth-error">{error}</p>}
       </form>
 
       <p className="auth-footer-text">

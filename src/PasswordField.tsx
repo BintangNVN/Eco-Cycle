@@ -1,5 +1,4 @@
 import { useId, useState } from "react";
-import "./App.css";
 
 type PasswordFieldProps = {
   label: string;
