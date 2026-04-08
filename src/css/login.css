@@ -258,4 +258,41 @@ button {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin-top: 4px;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.auth-btn-google:hover {
+  background: #f9fafb;
+}
+
+.auth-footer-text {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.auth-link-inline {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #134e4a;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline;
+}
+
+.auth-link-inline:hover {
+  text-decoration: underline;
+}
+
+/* LOGIN MODE */
+.auth-card--full {
+  grid-template-columns: 1fr;
+  max-width: 420px;
+  margin: 0 auto;
 }

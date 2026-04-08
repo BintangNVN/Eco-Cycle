@@ -58,7 +58,7 @@ export default function Login({
   };
 
   return (
-    <AuthLayout pageLabel="Sign In">
+    <AuthLayout variant="split">
       <AuthEcoLogo />
       <h1 className="auth-title">Welcome Back to Your Eco Journey</h1>
       <p className="auth-subtitle">

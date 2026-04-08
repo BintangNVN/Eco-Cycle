@@ -1,18 +1,27 @@
-import type { ReactNode } from "react";
+import React from "react";
 
 type AuthLayoutProps = {
+  children: React.ReactNode;
   pageLabel?: string;
-  children: ReactNode;
+  variant?: "split" | "full";
 };
 
-/** Shared shell: clean white background + split card (visual + form). */
-export default function AuthLayout({ pageLabel, children }: AuthLayoutProps) {
+export default function AuthLayout({
+  children,
+  pageLabel,
+  variant = "split",
+}: AuthLayoutProps) {
   return (
     <div className="auth-screen">
       <div className="auth-screen__inner">
-        {pageLabel ? <p className="auth-page-label">{pageLabel}</p> : null}
-        <div className="auth-card">
-          <div className="auth-card__visual" aria-hidden="true" />
+        {pageLabel && <p className="auth-page-label">{pageLabel}</p>}
+
+        <div className={`auth-card ${variant === "full" ? "auth-card--full" : ""}`}>
+          
+          {/* kiri hanya untuk register */}
+          {variant === "split" && <div className="auth-card__visual" />}
+
+          {/* kanan (form) */}
           <div className="auth-card__panel">{children}</div>
         </div>
       </div>
@@ -20,49 +29,43 @@ export default function AuthLayout({ pageLabel, children }: AuthLayoutProps) {
   );
 }
 
+/* ===== LOGO ECO ===== */
 export function AuthEcoLogo() {
   return (
-    <div className="auth-panel-top" aria-hidden="true">
+    <div className="auth-panel-top">
       <svg
         className="auth-eco-logo"
-        viewBox="0 0 40 40"
+        viewBox="0 0 24 24"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
+        stroke="#134e4a"
+        strokeWidth="2"
       >
-        <circle cx="20" cy="20" r="19" stroke="#134e4a" strokeWidth="2" fill="none" />
-        <path
-          d="M20 8c-4.5 0-8 3.2-8 7.5 0 2.8 1.5 5.2 3.8 6.5-.2-1.8.8-3.5 2.5-4.2 1.2-.5 2.5-.3 3.5.4.9-.9 2.3-1.2 3.6-.6 1.8.8 2.8 2.7 2.5 4.6 2.4-1.3 4.1-3.8 4.1-6.7C32 11.2 28.4 8 24 8h-4z"
-          fill="#134e4a"
-        />
-        <path
-          d="M14 28c1.2 2.2 3.5 3.6 6 3.6 2.2 0 4.2-1 5.4-2.6-.8.2-1.7 0-2.4-.4-.9-.5-1.4-1.4-1.3-2.4-.9.6-2.1.7-3.1.2-1.4-.7-2.1-2.3-1.7-3.8C15.6 24.5 14 26.1 14 28z"
-          fill="#134e4a"
-          opacity="0.85"
-        />
+        <path d="M12 2a10 10 0 1 0 10 10" />
+        <path d="M12 2v6l4-4" />
       </svg>
     </div>
   );
 }
 
+/* ===== GOOGLE ICON ===== */
 export function GoogleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 48 48">
       <path
-        fill="#4285F4"
-        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.73 1.22 9.24 3.6l6.9-6.9C35.86 2.36 30.31 0 24 0 14.82 0 6.78 5.64 2.82 13.66l8.02 6.23C12.94 13.06 17.98 9.5 24 9.5z"
       />
       <path
-        fill="#34A853"
-        d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
+        fill="#4285F4"
+        d="M46.1 24.5c0-1.64-.15-3.21-.42-4.73H24v9h12.4c-.53 2.84-2.13 5.25-4.53 6.86l7.02 5.46C43.98 36.94 46.1 31.2 46.1 24.5z"
       />
       <path
         fill="#FBBC05"
-        d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.348 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"
+        d="M10.84 28.89A14.49 14.49 0 0 1 9.5 24c0-1.7.29-3.34.82-4.89l-8.02-6.23A23.93 23.93 0 0 0 0 24c0 3.84.92 7.46 2.56 10.66l8.28-5.77z"
       />
       <path
-        fill="#EA4335"
-        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"
+        fill="#34A853"
+        d="M24 48c6.48 0 11.92-2.14 15.9-5.81l-7.02-5.46c-2 1.34-4.56 2.13-8.88 2.13-6.02 0-11.06-3.56-13.16-8.69l-8.28 5.77C6.78 42.36 14.82 48 24 48z"
       />
     </svg>
   );
