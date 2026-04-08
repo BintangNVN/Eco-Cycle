@@ -1,4 +1,4 @@
-import type { NearbyItem } from "./ItemDetails";
+import type { NearbyItem } from "./pages/ItemDetails";
 
 export type OrderStatus = "Processing" | "Packed" | "Out for Delivery" | "Delivered";
 

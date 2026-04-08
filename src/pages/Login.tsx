@@ -1,8 +1,8 @@
 import { FormEvent, useId, useState } from "react";
-import "./css/login.css";
-import { login } from "./api";
-import AuthLayout, { AuthEcoLogo, GoogleIcon } from "./AuthLayout";
-import PasswordField from "./PasswordField";
+import "../styles/css/login.css";
+import { login } from "../services/api";
+import AuthLayout, { AuthEcoLogo, GoogleIcon } from "../components/AuthLayout";
+import PasswordField from "../components/PasswordField";
 
 type LoginProps = {
   onSwitchToRegister: () => void;

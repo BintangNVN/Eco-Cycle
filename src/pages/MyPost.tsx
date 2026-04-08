@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import type { NearbyItem } from "./ItemDetails";
 import type { ReactNode } from "react";
-import "./css/dashboard.css";
+import "../styles/css/dashboard.css";
 
 type MyPostProps = {
   onBack: () => void;

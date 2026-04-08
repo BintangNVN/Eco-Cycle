@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { NearbyItem } from "./ItemDetails";
 import type { ReactNode } from "react";
-import "./css/dashboard.css";
-import { getUsers, logout } from "./api";
-import img1 from "./assets/images/daurulang.jpg";
-import img2 from "./assets/images/jualsampah.jpg";
-import img3 from "./assets/images/kebersihanlingkungan.jpg";
+import "../styles/css/dashboard.css";
+import { getUsers, logout } from "../services/api";
+import img1 from "../assets/images/daurulang.jpg";
+import img2 from "../assets/images/jualsampah.jpg";
+import img3 from "../assets/images/kebersihanlingkungan.jpg";
 
 type DashboardProps = {
   token: string | null;

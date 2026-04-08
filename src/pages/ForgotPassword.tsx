@@ -1,8 +1,8 @@
 import { FormEvent, useId, useState } from "react";
-import "./css/forgot-password.css";
-import AuthLayout, { AuthEcoLogo } from "./AuthLayout";
-import PasswordField from "./PasswordField";
-import { resetPassword } from "./api";
+import "../styles/css/forgot-password.css";
+import AuthLayout, { AuthEcoLogo } from "../components/AuthLayout";
+import PasswordField from "../components/PasswordField";
+import { resetPassword } from "../services/api";
 
 type ForgotPasswordProps = {
   onBackToLogin: () => void;

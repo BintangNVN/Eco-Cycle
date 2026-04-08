@@ -1,4 +1,4 @@
-import "./css/landing.css";
+import "../styles/css/landing.css";
 import { FaLinkedin, FaInstagram, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 

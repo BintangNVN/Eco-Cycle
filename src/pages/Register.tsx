@@ -1,8 +1,8 @@
 import { FormEvent, useId, useState } from "react";
-import "./css/register.css";
-import { register } from "./api";
-import AuthLayout, { AuthEcoLogo, GoogleIcon } from "./AuthLayout";
-import PasswordField from "./PasswordField";
+import "../styles/css/register.css";
+import { register } from "../services/api";
+import AuthLayout, { AuthEcoLogo, GoogleIcon } from "../components/AuthLayout";
+import PasswordField from "../components/PasswordField";
 
 type RegisterProps = {
   onSwitchToLogin: () => void;
@@ -13,7 +13,7 @@ export default function Register({
   onSwitchToLogin,
   onRegisterSuccess,
 }: RegisterProps) {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,10 +37,9 @@ export default function Register({
     setLoading(true);
     try {
       await register({
-        name,
+        username,
         email,
         password,
-        phoneNumber,
       });
 
       alert("Register berhasil, silakan login");
@@ -66,15 +65,15 @@ export default function Register({
       </p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
-        {/* NAME */}
+        {/* USERNAME */}
         <label className="auth-field" htmlFor={nameId}>
-          <span className="auth-field__label">Name</span>
+          <span className="auth-field__label">Username</span>
           <input
             id={nameId}
             className="auth-field__input"
             placeholder="Bintang"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </label>

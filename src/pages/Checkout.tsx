@@ -1,6 +1,6 @@
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar";
 import { useState } from "react";
-import "./css/checkout.css";
+import "../styles/css/checkout.css";
 import type { NearbyItem } from "./ItemDetails";
 import type { ReactNode } from "react";
 

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import Dashboard from "./Dashboard";
-import ItemDetails from "./ItemDetails";
-import Checkout from "./Checkout";
-import OrderConfirmed from "./OrderConfirmed";
-import OrderDetail from "./OrderDetail";
-import MyOrders from "./MyOrders";
-import MyPost from "./MyPost";
-import type { NearbyItem } from "./ItemDetails";
+import Dashboard from "./pages/Dashboard";
+import ItemDetails from "./pages/ItemDetails";
+import Checkout from "./pages/Checkout";
+import OrderConfirmed from "./pages/OrderConfirmed";
+import OrderDetail from "./pages/OrderDetail";
+import MyOrders from "./pages/MyOrders";
+import MyPost from "./pages/MyPost";
+import type { NearbyItem } from "./pages/ItemDetails";
 import type { Order } from "./types";
-import Landing from "./Landing";
-import ForgotPassword from "./ForgotPassword";
-import Login from "./Login";
-import Register from "./Register";
+import Landing from "./pages/Landing";
+import ForgotPassword from "./pages/ForgotPassword";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 type Page = "landing" | "login" | "register" | "forgot-password" | "dashboard" | "items-by-kategori" | "item-details" | "checkout" | "order-confirmed" | "order-detail" | "my-orders" | "my-post";
 

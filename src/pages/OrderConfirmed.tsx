@@ -1,5 +1,5 @@
-import Navbar from "./Navbar";
-import "./css/order-confirmed.css";
+import Navbar from "../components/Navbar";
+import "../styles/css/order-confirmed.css";
 import type { NearbyItem } from "./ItemDetails";
 
 type OrderConfirmedProps = {

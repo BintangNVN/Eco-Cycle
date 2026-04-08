@@ -1,6 +1,6 @@
-import Navbar from "./Navbar";
-import type { Order } from "./types";
-import "./css/order-confirmed.css";
+import Navbar from "../components/Navbar";
+import type { Order } from "../types";
+import "../styles/css/order-confirmed.css";
 
 type OrderDetailProps = {
   order: Order | null;

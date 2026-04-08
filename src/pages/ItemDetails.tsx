@@ -1,8 +1,8 @@
-import Navbar from "./Navbar";
-import "./css/item-details.css";
-import img1 from "./assets/images/daurulang.jpg";
-import img2 from "./assets/images/jualsampah.jpg";
-import img3 from "./assets/images/kebersihanlingkungan.jpg";
+import Navbar from "../components/Navbar";
+import "../styles/css/item-details.css";
+import img1 from "../assets/images/daurulang.jpg";
+import img2 from "../assets/images/jualsampah.jpg";
+import img3 from "../assets/images/kebersihanlingkungan.jpg";
 
 export type NearbyItem = {
   id: string;
