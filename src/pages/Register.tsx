@@ -1,6 +1,6 @@
 import { FormEvent, useId, useState } from "react";
 import "../styles/css/register.css";
-import { register } from "../services/api";
+import { register } from "../services/api/api";
 import AuthLayout, { AuthEcoLogo, GoogleIcon } from "../components/AuthLayout";
 import PasswordField from "../components/PasswordField";
 
@@ -13,7 +13,7 @@ export default function Register({
   onSwitchToLogin,
   onRegisterSuccess,
 }: RegisterProps) {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,9 +37,10 @@ export default function Register({
     setLoading(true);
     try {
       await register({
-        username,
+        name,
         email,
         password,
+        phoneNumber: phoneNumber,
       });
 
       alert("Register berhasil, silakan login");
@@ -72,8 +73,8 @@ export default function Register({
             id={nameId}
             className="auth-field__input"
             placeholder="Bintang"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </label>
@@ -110,6 +111,7 @@ export default function Register({
           label="Password"
           value={password}
           onChange={setPassword}
+          required
         />
 
         {/* CONFIRM */}
@@ -117,9 +119,12 @@ export default function Register({
           label="Confirm Password"
           value={confirmPassword}
           onChange={setConfirmPassword}
+          required
         />
 
-        <button className="auth-btn-primary" disabled={loading}>
+        {error && <p className="auth-error">{error}</p>}
+
+        <button type="submit" className="auth-btn-primary" disabled={loading}>
           {loading ? "Signing up..." : "Sign Up"}
         </button>
 
@@ -127,8 +132,6 @@ export default function Register({
           <GoogleIcon />
           Sign in with Google
         </button>
-
-        {error && <p className="auth-error">{error}</p>}
       </form>
 
       <p className="auth-footer-text">

@@ -48,7 +48,7 @@ export default function OrderDetail({ order, onBack, token, onLogout, onMyPost, 
           </button>
           <div>
             <h1>Order Detail</h1>
-            
+
           </div>
         </div>
 
@@ -93,16 +93,16 @@ export default function OrderDetail({ order, onBack, token, onLogout, onMyPost, 
                 <p className="delivery-text">{order.shippingAddress.phone}</p>
                 <p className="delivery-text">{order.shippingAddress.street}</p>
               </div>
-            
+
               <div className="delivery-section">
                 <span className="section-label">Shipping Method</span>
                 <div className="delivery-method-row">
                   <div className="delivery-box-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8c7a" strokeWidth="2">
-                      <path d="M16 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                      <path d="M6 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                      <path d="M3 5h13l4 6v5h-1"/>
-                      <path d="M3 11h16"/>
+                      <path d="M16 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                      <path d="M6 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                      <path d="M3 5h13l4 6v5h-1" />
+                      <path d="M3 11h16" />
                     </svg>
                   </div>
                   <div>
@@ -131,7 +131,9 @@ export default function OrderDetail({ order, onBack, token, onLogout, onMyPost, 
               </div>
               <div className="summary-total-row">
                 <span>Total Amount</span>
-                <span>Rp{(order.shippingFee + parseInt(order.item.price.replace(/\D/g, ""), 10)).toLocaleString("id-ID")}</span>
+                <span>
+                  Rp{(order.shippingFee + (parseInt(String(order.item.price || "0").replace(/\D/g, ""), 10) || 0)).toLocaleString("id-ID")}
+                </span>
               </div>
             </div>
           </div>

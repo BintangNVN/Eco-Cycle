@@ -219,9 +219,8 @@ export default function Checkout({ item, onBack, onOrderConfirm, token, onLogout
   const [selectedPayment, setSelectedPayment] = useState<string>("cod");
 
   const shippingOption = shippingOptions.find((opt) => opt.id === selectedShipping);
-  const productPrice = item?.price ? parseInt(item.price.replace(/\D/g, "")) : 0;
-  const shippingPrice = shippingOption?.price || 0;
-  const ecoPackagingPrice = 0; // Free in this case
+  const productPrice = item?.price ? parseInt(String(item.price).replace(/\D/g, ""), 10) || 0 : 0;  const shippingPrice = shippingOption?.price || 0;
+  const ecoPackagingPrice = 0;
   const totalPrice = productPrice + shippingPrice + ecoPackagingPrice;
 
   const handleSaveAddress = () => {

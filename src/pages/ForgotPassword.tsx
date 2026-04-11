@@ -2,7 +2,7 @@ import { FormEvent, useId, useState } from "react";
 import "../styles/css/forgot-password.css";
 import AuthLayout, { AuthEcoLogo } from "../components/AuthLayout";
 import PasswordField from "../components/PasswordField";
-import { resetPassword } from "../services/api";
+import { resetPassword } from "../services/api/api";
 
 type ForgotPasswordProps = {
   onBackToLogin: () => void;
@@ -21,8 +21,6 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
     setError(null);
     setLoading(true);
     try {
-      // Di app ini, halaman "lupa password" digunakan sebagai "reset password"
-      // (email + password baru).
       await resetPassword({ email, password });
       onBackToLogin();
     } catch (err: any) {

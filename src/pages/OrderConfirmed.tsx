@@ -21,10 +21,8 @@ export default function OrderConfirmed({
   onMyPost,
   onMyOrders,
 }: OrderConfirmedProps) {
-  // Generate a random order number
   const orderNumber = `#EC-${Date.now().toString().slice(-9)}`;
   
-  // Calculate estimated delivery date (3 days from now)
   const estimatedDate = new Date();
   estimatedDate.setDate(estimatedDate.getDate() + 3);
   const formattedDate = estimatedDate.toLocaleDateString("en-US", {
@@ -46,8 +44,7 @@ export default function OrderConfirmed({
   }
 
   // Extract weight from item (e.g., "1kg" -> "1")
-  const weight = item.weight.replace(/[^0-9.]/g, "");
-
+const weight = item?.weight ? String(item.weight).replace(/[^0-9.]/g, "") : "0";
   return (
     <div className="order-confirmed-screen">
       <Navbar

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { NearbyItem } from "./ItemDetails";
 import type { ReactNode } from "react";
 import "../styles/css/dashboard.css";
-import { getUsers, logout } from "../services/api";
+// IMPORT API
+import { getUsers, logout, getMyPosts, getCategories } from "../services/api/api";
 import img1 from "../assets/images/daurulang.jpg";
 import img2 from "../assets/images/jualsampah.jpg";
 import img3 from "../assets/images/kebersihanlingkungan.jpg";
@@ -20,12 +21,26 @@ type DashboardProps = {
 type Category = {
   id: string;
   label: string;
-  emoji: string;
-  icon: string;
+  name?: string;
+  emoji?: string;
+  icon?: string;
   iconComponent?: ReactNode;
 };
 
-// SVG Icons for categories
+// Interface data gabungan dari API
+interface ExtendNearbyItem extends Omit<NearbyItem, 'weight'> {
+  id: string;
+  name?: string;
+  label?: string;
+  poitRewards?: number | string;
+  image?: string[]; 
+  category?: { id: string; name: string };
+  categoryId?: string;
+  condition?: string;
+  weight?: number | string;
+}
+
+// === KUMPULAN ICON SVG ===
 const PlasticIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <path d="M7 2h10l2 7H5l2-7z"/>
@@ -35,7 +50,6 @@ const PlasticIcon = () => (
     <circle cx="15" cy="15" r="0.5" fill="currentColor"/>
   </svg>
 );
-
 const GlassIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <path d="M6 3h12l-1 8c0 2-1 3-5 3s-5-1-5-3L6 3z"/>
@@ -43,7 +57,6 @@ const GlassIcon = () => (
     <path d="M7 14l-1 6c0 1 1 2 2 2h8c1 0 2-1 2-2l-1-6"/>
   </svg>
 );
-
 const TinIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="6" y="4" width="12" height="14" rx="1"/>
@@ -54,7 +67,6 @@ const TinIcon = () => (
     <line x1="9" y1="22" x2="15" y2="22"/>
   </svg>
 );
-
 const CardboardIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="3" y="3" width="18" height="18" rx="1"/>
@@ -64,7 +76,6 @@ const CardboardIcon = () => (
     <line x1="3" y1="12" x2="21" y2="12"/>
   </svg>
 );
-
 const PatchworkIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="3" y="3" width="8" height="8"/>
@@ -75,7 +86,6 @@ const PatchworkIcon = () => (
     <line x1="11" y1="3" x2="11" y2="21"/>
   </svg>
 );
-
 const PaperIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="5" y="2" width="14" height="20" rx="1"/>
@@ -85,90 +95,67 @@ const PaperIcon = () => (
   </svg>
 );
 
+const getCategoryIcon = (catName: string = "") => {
+  const name = catName.toLowerCase();
+  if (name.includes('plastic') || name.includes('plastik')) return <PlasticIcon />;
+  if (name.includes('glass') || name.includes('kaca')) return <GlassIcon />;
+  if (name.includes('tin') || name.includes('kaleng') || name.includes('logam')) return <TinIcon />;
+  if (name.includes('cardboard') || name.includes('kardus')) return <CardboardIcon />;
+  if (name.includes('patchwork') || name.includes('kain')) return <PatchworkIcon />;
+  if (name.includes('paper') || name.includes('kertas')) return <PaperIcon />;
+  return <PlasticIcon />; // Default
+};
 
 const sliderImages = [
-  {
-    title: "Ayo Daur Ulang!",
-    subtitle: "Temukan mudah sampah daur ulang terdekat",
-    image: img1,
-  },
-  {
-    title: "Jual Sampahmu",
-    subtitle: "Dapatkan nilai terbaik untuk sampah plastik, kertas, dan logam Anda",
-    image: img2,
-  },
-  {
-    title: "Bersih dan Ramah Lingkungan",
-    subtitle: "Satu langkah kecil untuk masa depan hijau",
-    image: img3,
-  },
+  { title: "Ayo Daur Ulang!", subtitle: "Temukan mudah sampah daur ulang terdekat", image: img1 },
+  { title: "Jual Sampahmu", subtitle: "Dapatkan nilai terbaik untuk sampah plastik, kertas, dan logam Anda", image: img2 },
+  { title: "Bersih dan Ramah Lingkungan", subtitle: "Satu langkah kecil untuk masa depan hijau", image: img3 },
 ];
-
-const categories: Category[] = [
-  { id: "plastic", label: "Plastic", emoji: "🧴", icon: "🍶", iconComponent: <PlasticIcon /> },
-  { id: "glass", label: "Glass", emoji: "🍾", icon: "🍾", iconComponent: <GlassIcon /> },
-  { id: "tin", label: "Tin", emoji: "🥫", icon: "🥫", iconComponent: <TinIcon /> },
-  { id: "cardboard", label: "Cardboard", emoji: "📦", icon: "📦", iconComponent: <CardboardIcon /> },
-  { id: "patchwork", label: "Patchwork", emoji: "🧵", icon: "🧵", iconComponent: <PatchworkIcon /> },
-  { id: "paper", label: "Paper", emoji: "📰", icon: "📰", iconComponent: <PaperIcon /> },
-];
-
-const allItems: NearbyItem[] = [
-  { id: "item-1", title: "Plastic Bottle Waste", type: "Plastic", categoryId: "plastic", location: "Pondok Kelapa, Jakarta Timur", weight: "1kg", price: "Rp5.000", badge: "Cleaned" },
-  { id: "item-2", title: "Plastic Container Bundle", type: "Plastic", categoryId: "plastic", location: "Pondok Indah, Jakarta Selatan", weight: "2.5kg", price: "Rp8.000", badge: "Cleaned" },
-  { id: "item-3", title: "Plastic Bag Collection", type: "Plastic", categoryId: "plastic", location: "Cipete, Jakarta Selatan", weight: "0.5kg", price: "Rp2.000", badge: "Available" },
-  { id: "item-4", title: "Plastic Bottle Mix", type: "Plastic", categoryId: "plastic", location: "Tebet, Jakarta Selatan", weight: "1.5kg", price: "Rp6.000", badge: "Cleaned" },
-  { id: "item-5", title: "Transparent Plastic Sheets", type: "Plastic", categoryId: "plastic", location: "Kemang, Jakarta Selatan", weight: "3kg", price: "Rp10.000", badge: "Available" },
-  { id: "item-6", title: "Plastic Waste Pack", type: "Plastic", categoryId: "plastic", location: "Pancoran, Jakarta Selatan", weight: "2kg", price: "Rp7.000", badge: "Unprocessed" },
-  { id: "item-7", title: "Glass Bottle Deposit", type: "Glass", categoryId: "glass", location: "Bekasi, Jawa Barat", weight: "0.8kg", price: "Rp10.000", badge: "Available" },
-  { id: "item-8", title: "Clear Glass Jars", type: "Glass", categoryId: "glass", location: "Condet, Jakarta Timur", weight: "1.2kg", price: "Rp12.000", badge: "Cleaned" },
-  { id: "item-9", title: "Green Glass Bottles", type: "Glass", categoryId: "glass", location: "Kramat Jati, Jakarta Timur", weight: "2kg", price: "Rp15.000", badge: "Cleaned" },
-  { id: "item-10", title: "Mixed Glass Collection", type: "Glass", categoryId: "glass", location: "Jati Baru, Jakarta Utara", weight: "3kg", price: "Rp18.000", badge: "Available" },
-  { id: "item-11", title: "Brown Glass Containers", type: "Glass", categoryId: "glass", location: "Penjaringan, Jakarta Utara", weight: "1.5kg", price: "Rp11.000", badge: "Cleaned" },
-  { id: "item-12", title: "Glass Bottle Set", type: "Glass", categoryId: "glass", location: "Sunter, Jakarta Utara", weight: "2.5kg", price: "Rp16.000", badge: "Available" },
-  { id: "item-13", title: "Aluminum Can Collection", type: "Tin", categoryId: "tin", location: "Cikini, Jakarta Pusat", weight: "0.5kg", price: "Rp8.000", badge: "Cleaned" },
-  { id: "item-14", title: "Tin Can Bundle", type: "Tin", categoryId: "tin", location: "Menteng, Jakarta Pusat", weight: "1kg", price: "Rp12.000", badge: "Available" },
-  { id: "item-15", title: "Beverage Can Mix", type: "Tin", categoryId: "tin", location: "Gambir, Jakarta Pusat", weight: "0.8kg", price: "Rp10.000", badge: "Cleaned" },
-  { id: "item-16", title: "Metal Tin Containers", type: "Tin", categoryId: "tin", location: "Palmerah, Jakarta Barat", weight: "1.5kg", price: "Rp14.000", badge: "Available" },
-  { id: "item-17", title: "Food Can Collection", type: "Tin", categoryId: "tin", location: "Grogol, Jakarta Barat", weight: "2kg", price: "Rp16.000", badge: "Cleaned" },
-  { id: "item-18", title: "Aluminum Foil Pack", type: "Tin", categoryId: "tin", location: "Tanjung Priok, Jakarta Utara", weight: "0.6kg", price: "Rp9.000", badge: "Available" },
-  { id: "item-19", title: "Cardboard Box Stack", type: "Cardboard", categoryId: "cardboard", location: "Kramat Jati, Jakarta Timur", weight: "3kg", price: "Rp5.000", badge: "Available" },
-  { id: "item-20", title: "Corrugated Paper Bundle", type: "Cardboard", categoryId: "cardboard", location: "Matraman, Jakarta Timur", weight: "4kg", price: "Rp6.000", badge: "Cleaned" },
-  { id: "item-21", title: "Kraft Cardboard Sheets", type: "Cardboard", categoryId: "cardboard", location: "Ciracas, Jakarta Timur", weight: "2.5kg", price: "Rp4.000", badge: "Available" },
-  { id: "item-22", title: "Shipping Boxes", type: "Cardboard", categoryId: "cardboard", location: "Cawang, Jakarta Timur", weight: "5kg", price: "Rp7.000", badge: "Cleaned" },
-  { id: "item-23", title: "Flattened Cardboard", type: "Cardboard", categoryId: "cardboard", location: "Pulo Gadung, Jakarta Timur", weight: "3.5kg", price: "Rp5.500", badge: "Available" },
-  { id: "item-24", title: "Brown Cardboard Mix", type: "Cardboard", categoryId: "cardboard", location: "Rawa Jati, Jakarta Timur", weight: "4.5kg", price: "Rp6.500", badge: "Cleaned" },
-  { id: "item-25", title: "Paper Waste Bundle", type: "Paper", categoryId: "paper", location: "Cibubur, Jakarta Timur", weight: "2kg", price: "Free", badge: "Unprocessed" },
-  { id: "item-26", title: "Newspaper Collection", type: "Paper", categoryId: "paper", location: "Kertamukti, Jakarta Timur", weight: "3kg", price: "Free", badge: "Available" },
-  { id: "item-27", title: "Magazine Stack", type: "Paper", categoryId: "paper", location: "Pulogadung, Jakarta Timur", weight: "2.5kg", price: "Free", badge: "Unprocessed" },
-  { id: "item-28", title: "Office Paper Waste", type: "Paper", categoryId: "paper", location: "Cilangkap, Jakarta Timur", weight: "4kg", price: "Rp2.000", badge: "Cleaned" },
-  { id: "item-29", title: "White Paper Bundle", type: "Paper", categoryId: "paper", location: "Segara, Jakarta Timur", weight: "1.5kg", price: "Rp1.500", badge: "Available" },
-  { id: "item-30", title: "Mixed Paper Collection", type: "Paper", categoryId: "paper", location: "Ujung Menteng, Jakarta Timur", weight: "3.5kg", price: "Free", badge: "Available" },
-  { id: "item-31", title: "Fabric Scrap Collection", type: "Patchwork", categoryId: "patchwork", location: "Kebon Sirih, Jakarta Pusat", weight: "1kg", price: "Rp3.000", badge: "Available" },
-  { id: "item-32", title: "Cotton Waste Bundle", type: "Patchwork", categoryId: "patchwork", location: "Gambir, Jakarta Pusat", weight: "1.5kg", price: "Rp4.000", badge: "Cleaned" },
-  { id: "item-33", title: "Textile Leftovers", type: "Patchwork", categoryId: "patchwork", location: "Palmerah, Jakarta Barat", weight: "2kg", price: "Rp5.000", badge: "Available" },
-  { id: "item-34", title: "Polyester Scraps", type: "Patchwork", categoryId: "patchwork", location: "Tanah Abang, Jakarta Pusat", weight: "1.2kg", price: "Rp3.500", badge: "Cleaned" },
-  { id: "item-35", title: "Wool Waste Collection", type: "Patchwork", categoryId: "patchwork", location: "Kemayoran, Jakarta Pusat", weight: "2.5kg", price: "Rp6.000", badge: "Available" },
-  { id: "item-36", title: "Mixed Fabric Bundle", type: "Patchwork", categoryId: "patchwork", location: "Senen, Jakarta Pusat", weight: "1.8kg", price: "Rp4.500", badge: "Cleaned" },
-];
-
-const nearbyItems: NearbyItem[] = allItems.slice(0, 3);
-
 
 function getBadgeClass(badge: string) {
   if (badge === "Cleaned") return "tag tag-cleaned";
-  if (badge === "Available") return "tag tag-available";
-  if (badge === "Unprocessed") return "tag tag-unprocessed";
+  if (badge === "Available" || badge === "good" || badge === "new") return "tag tag-available";
+  if (badge === "Unprocessed" || badge === "bad") return "tag tag-unprocessed";
   return "tag tag-type";
 }
 
-function ItemCard({ item, onViewDetails }: { item: NearbyItem; onViewDetails: (item: NearbyItem) => void }) {
-  const categoryIcon = categories.find(c => c.id === item.categoryId)?.iconComponent;
+// === KOMPONEN ITEM CARD PINTAR ===
+function ItemCard({ item, onViewDetails, catIcon }: { item: ExtendNearbyItem; onViewDetails: (item: NearbyItem) => void, catIcon?: ReactNode }) {
+  const displayTitle = item.name || item.title || item.label || "Untitled Product";
+  const displayPoints = item.poitRewards ? `${item.poitRewards} Coins` : (item.price ? `Rp ${item.price}` : "No Reward");
+
+  const backendBaseUrl = "https://service-capstone-project-production.up.railway.app";
+  let imageUrl = "";
+
+  if (item.image && Array.isArray(item.image) && item.image.length > 0) {
+    const rawPath = item.image[0]; 
+    if (rawPath.startsWith("http")) {
+      imageUrl = rawPath; 
+    } else {
+      imageUrl = rawPath.startsWith("/") ? `${backendBaseUrl}${rawPath}` : `${backendBaseUrl}/${rawPath}`;
+    }
+  }
+
+  const categoryName = item.category?.name || item.type || "Item";
+  const iconToUse = catIcon || getCategoryIcon(categoryName);
+
   return (
     <div className="item-card">
       <div className="card-img-wrap">
-        <div className="card-img-placeholder" style={{ color: "#1a8c7a" }}>
-          {categoryIcon || "♻️"}
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={displayTitle} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} 
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as any).nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        
+        <div className="card-img-placeholder" style={{ color: "#1a8c7a", display: imageUrl ? 'none' : 'flex' }}>
+          {iconToUse}
         </div>
       </div>
       <div className="card-body">
@@ -178,19 +165,21 @@ function ItemCard({ item, onViewDetails }: { item: NearbyItem; onViewDetails: (i
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
               <circle cx="12" cy="10" r="3"/>
             </svg>
-            {item.location}
+            {item.location || "Bogor, Indonesia"}
           </div>
-          <span className="card-weight">{item.weight}</span>
+          <span className="card-weight">{item.weight || "0"} kg</span>
         </div>
-        <div className="card-title">{item.title}</div>
+        <div className="card-title">{displayTitle}</div>
         <div className="card-tags">
-          <span className="tag tag-type">{item.type}</span>
-          <span className={getBadgeClass(item.badge)}>{item.badge}</span>
+          <span className="tag tag-type">{categoryName}</span>
+          <span className={getBadgeClass(item.condition || "Available")}>
+            {item.condition === 'good' ? 'Bagus' : (item.condition === 'bad' ? 'Rusak' : (item.condition === 'new' ? 'Baru' : item.condition || "Available"))}
+          </span>
         </div>
       </div>
       <div className="card-footer">
-        <div className="card-price">{item.price}</div>
-        <button className="card-view-btn" type="button" onClick={() => onViewDetails(item)}>
+        <div className="card-price">{displayPoints}</div>
+        <button className="card-view-btn" type="button" onClick={() => onViewDetails(item as unknown as NearbyItem)}>
           View Details
         </button>
       </div>
@@ -200,74 +189,110 @@ function ItemCard({ item, onViewDetails }: { item: NearbyItem; onViewDetails: (i
 
 export default function Dashboard({ token, onLogout, initialCategoryId, onCategoryNavigate, onViewDetails, onMyPost, onMyOrders }: DashboardProps) {
   const [users, setUsers] = useState<Array<any>>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [slideIndex, setSlideIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategoryId ?? null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  
+  // State Dinamis dari Backend
+  const [apiPosts, setApiPosts] = useState<ExtendNearbyItem[]>([]);
+  const [apiCategories, setApiCategories] = useState<Category[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     setSelectedCategory(initialCategoryId ?? null);
   }, [initialCategoryId]);
 
-  const currentUser = useMemo(() => {
-    if (users.length > 0) return users[0];
-    return { name: "Pengguna", email: "user@example.com" };
-  }, [users]);
+  // FETCH DATA POST & KATEGORI
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDashboardData = async () => {
+      setLoadingData(true);
+      try {
+        const [postsRes, catsRes] = await Promise.all([getMyPosts(), getCategories()]);
+        
+        if (isMounted) {
+          // Ambil posts dari struktur pagination backend
+          const fetchedPosts = Array.isArray(postsRes.data?.data?.posts) 
+            ? postsRes.data.data.posts 
+            : (Array.isArray(postsRes.data?.data) ? postsRes.data.data : []);
+          setApiPosts(fetchedPosts);
 
-  const filteredCategories = useMemo(() => {
-    if (!searchTerm.trim()) return categories;
-    const q = searchTerm.toLowerCase();
-    return categories.filter((cat) => cat.label.toLowerCase().includes(q));
-  }, [searchTerm]);
+          // Ambil kategori
+          const fetchedCats = Array.isArray(catsRes.data?.data) ? catsRes.data.data : [];
+          setApiCategories(fetchedCats.map((c: any) => ({
+            id: c.id,
+            label: c.name || c.label,
+            name: c.name,
+            iconComponent: getCategoryIcon(c.name || c.label)
+          })));
+        }
+      } catch (error) {
+        console.error("Gagal memuat data Dashboard:", error);
+      } finally {
+        if (isMounted) setLoadingData(false);
+      }
+    };
 
-  const filteredNearby = useMemo(() => {
-    if (!searchTerm.trim()) return nearbyItems;
-    const q = searchTerm.toLowerCase();
-    return nearbyItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.type.toLowerCase().includes(q) ||
-        item.location.toLowerCase().includes(q)
-    );
-  }, [searchTerm]);
+    fetchDashboardData();
+    return () => { isMounted = false; };
+  }, []);
 
-  const categoryItems = useMemo(() => {
-    if (!selectedCategory) return [];
-    const items = allItems.filter((item) => item.categoryId === selectedCategory);
-    if (!searchTerm.trim()) return items;
-    const q = searchTerm.toLowerCase();
-    return items.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.location.toLowerCase().includes(q)
-    );
-  }, [selectedCategory, searchTerm]);
-
-  const selectedCategoryData = useMemo(() => {
-    if (!selectedCategory) return null;
-    return categories.find((cat) => cat.id === selectedCategory) || null;
-  }, [selectedCategory]);
-
+  // Fetch Users
   useEffect(() => {
     if (!token) { setUsers([]); return; }
     let canceled = false;
     async function loadUsers() {
-      setLoading(true); setError(null);
       try {
-        const response = await getUsers(token || undefined);
+        const response = await getUsers();
         if (!canceled) setUsers(response.data ?? []);
-      } catch (err) {
-        if (!canceled) setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        if (!canceled) setLoading(false);
-      }
+      } catch (err) {}
     }
     loadUsers();
     return () => { canceled = true; };
   }, [token]);
 
+  // Logika Filter Pencarian
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm.trim()) return apiCategories;
+    const q = searchTerm.toLowerCase();
+    return apiCategories.filter((cat) => (cat.label || cat.name || "").toLowerCase().includes(q));
+  }, [searchTerm, apiCategories]);
+
+  // Nearby Items (Ambil maksimal 6 post terbaru agar Dashboard rapi)
+  const filteredNearby = useMemo(() => {
+    const baseItems = apiPosts.slice(0, 6); // Batasi 6 item
+    if (!searchTerm.trim()) return baseItems;
+    
+    const q = searchTerm.toLowerCase();
+    return baseItems.filter(
+      (item) =>
+        (item.name || item.title || "").toLowerCase().includes(q) ||
+        (item.category?.name || item.type || "").toLowerCase().includes(q) ||
+        (item.location || "").toLowerCase().includes(q)
+    );
+  }, [searchTerm, apiPosts]);
+
+  // Logika Kategori Spesifik
+  const categoryItems = useMemo(() => {
+    if (!selectedCategory) return [];
+    const items = apiPosts.filter((item) => item.categoryId === selectedCategory);
+    if (!searchTerm.trim()) return items;
+    
+    const q = searchTerm.toLowerCase();
+    return items.filter(
+      (item) =>
+        (item.name || item.title || "").toLowerCase().includes(q) ||
+        (item.location || "").toLowerCase().includes(q)
+    );
+  }, [selectedCategory, searchTerm, apiPosts]);
+
+  const selectedCategoryData = useMemo(() => {
+    if (!selectedCategory) return null;
+    return apiCategories.find((cat) => cat.id === selectedCategory) || null;
+  }, [selectedCategory, apiCategories]);
+
+  // Slider Animasi
   useEffect(() => {
     const interval = setInterval(() => {
       setSlideIndex((prev) => (prev + 1) % sliderImages.length);
@@ -275,6 +300,7 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
     return () => clearInterval(interval);
   }, []);
 
+  // Tutup dropdown jika klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -282,39 +308,20 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
         setShowProfileDropdown(false);
       }
     };
-
-    if (showProfileDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (showProfileDropdown) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileDropdown]);
 
   const handleLogout = async () => {
     if (!token) { onLogout(); return; }
-    try { await logout(token); } catch {}
+    try { await logout(); } catch {}
     onLogout();
   };
 
-  const handleProfileClick = () => {
-    setShowProfileDropdown(!showProfileDropdown);
-  };
-
-  const handleMyOrdersClick = () => {
-    setShowProfileDropdown(false);
-    onMyOrders?.();
-  };
-
-  const handleMyPostClick = () => {
-    setShowProfileDropdown(false);
-    onMyPost?.();
-  };
-
-  const handleViewDetails = (item: NearbyItem) => {
-    onViewDetails(item);
-  };
+  const handleProfileClick = () => setShowProfileDropdown(!showProfileDropdown);
+  const handleMyOrdersClick = () => { setShowProfileDropdown(false); onMyOrders?.(); };
+  const handleMyPostClick = () => { setShowProfileDropdown(false); onMyPost?.(); };
+  const handleViewDetails = (item: NearbyItem) => onViewDetails(item);
 
   const handleCategorySelect = (categoryId: string) => {
     setSearchTerm("");
@@ -370,48 +377,46 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
           </button>
 
           {token ? (
-            <>
-              <div className="profile-dropdown-container">
-                <img
-                  src="https://i.pravatar.cc/72"
-                  alt="Avatar"
-                  className="navbar-avatar"
-                  onClick={handleProfileClick}
-                  style={{ cursor: 'pointer' }}
-                />
-                {showProfileDropdown && (
-                  <div className="profile-dropdown">
-                    <button className="dropdown-item" onClick={handleMyOrdersClick}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 7h18v14H3z"/>
-                        <path d="M3 11h18"/>
-                        <path d="M7 7v-3"/>
-                      </svg>
-                      My Orders
-                    </button>
-                    <button className="dropdown-item" onClick={handleMyPostClick}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
-                      </svg>
-                      My Post
-                    </button>
-                    <div className="dropdown-divider" />
-                    <button className="dropdown-item logout-item" onClick={handleLogout}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16,17 21,12 16,7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                      </svg>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
+            <div className="profile-dropdown-container">
+              <img
+                src="https://i.pravatar.cc/72"
+                alt="Avatar"
+                className="navbar-avatar"
+                onClick={handleProfileClick}
+                style={{ cursor: 'pointer' }}
+              />
+              {showProfileDropdown && (
+                <div className="profile-dropdown">
+                  <button className="dropdown-item" onClick={handleMyOrdersClick}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 7h18v14H3z"/>
+                      <path d="M3 11h18"/>
+                      <path d="M7 7v-3"/>
+                    </svg>
+                    My Orders
+                  </button>
+                  <button className="dropdown-item" onClick={handleMyPostClick}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    My Post
+                  </button>
+                  <div className="dropdown-divider" />
+                  <button className="dropdown-item logout-item" onClick={handleLogout}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16,17 21,12 16,7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <button className="btn-outline">Login</button>
@@ -421,10 +426,13 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
         </div>
       </nav>
 
-      {/* MAIN */}
+      {/* MAIN CONTENT */}
       <div className="main-content">
-
-        {selectedCategory && selectedCategoryData ? (
+        {loadingData ? (
+          <div className="empty-state">
+            <p>Memuat data Dashboard...</p>
+          </div>
+        ) : selectedCategory && selectedCategoryData ? (
           <>
             <div className="cat-header">
               <button className="back-btn" onClick={handleCategoryBack}>
@@ -433,9 +441,7 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
                 </svg>
                 Back
               </button>
-              <h2 className="cat-title">
-                {selectedCategoryData.label}
-              </h2>
+              <h2 className="cat-title">{selectedCategoryData.label}</h2>
             </div>
 
             {categoryItems.length > 0 ? (
@@ -446,11 +452,10 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
               </div>
             ) : (
               <div className="cards-grid">
-                <div className="empty-state">Tidak ada barang ditemukan.</div>
+                <div className="empty-state">Tidak ada barang ditemukan di kategori ini.</div>
               </div>
             )}
           </>
-
         ) : (
           /* ─── MAIN DASHBOARD VIEW ─── */
           <>
@@ -481,14 +486,18 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
               <div className="section-title">Categories</div>
             </div>
             <div className="categories-grid">
-              {filteredCategories.map((cat) => (
-                <button key={cat.id} className="category-item" onClick={() => handleCategorySelect(cat.id)}>
-                  <div className="category-circle" style={{ color: "#1a8c7a" }}>
-                    {cat.iconComponent}
-                  </div>
-                  <span className="category-label">{cat.label}</span>
-                </button>
-              ))}
+              {filteredCategories.length > 0 ? (
+                filteredCategories.map((cat) => (
+                  <button key={cat.id} className="category-item" onClick={() => handleCategorySelect(cat.id)}>
+                    <div className="category-circle" style={{ color: "#1a8c7a" }}>
+                      {cat.iconComponent}
+                    </div>
+                    <span className="category-label">{cat.label}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="empty-state">Kategori sedang dimuat...</div>
+              )}
             </div>
 
             {/* NEARBY */}
@@ -506,7 +515,7 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
               {filteredNearby.length > 0 ? (
                 filteredNearby.map((item) => <ItemCard key={item.id} item={item} onViewDetails={handleViewDetails} />)
               ) : (
-                <div className="empty-state">Tidak ada barang terdekat sesuai pencarian.</div>
+                <div className="empty-state">Belum ada barang di sekitar kamu.</div>
               )}
             </div>
           </>

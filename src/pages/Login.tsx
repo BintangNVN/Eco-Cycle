@@ -1,6 +1,6 @@
 import { FormEvent, useId, useState } from "react";
 import "../styles/css/login.css";
-import { login } from "../services/api";
+import { login } from "../services/api/api";
 import AuthLayout, { AuthEcoLogo, GoogleIcon } from "../components/AuthLayout";
 import PasswordField from "../components/PasswordField";
 
@@ -45,7 +45,6 @@ export default function Login({
 
       onLoginSuccess(token);
     } catch (err: any) {
-      // ambil error dari backend kalau ada
       const message =
         err?.response?.data?.message ||
         err?.message ||

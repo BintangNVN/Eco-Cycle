@@ -50,7 +50,9 @@ export default function MyOrders({ orders, onBack, onViewOrderDetail, token, onL
                     <div className="order-history-number">{order.orderNumber}</div>
                     <div className="order-history-status">{order.status}</div>
                   </div>
-                  <div className="order-history-price">Rp{(parseInt(order.item.price.replace(/\D/g, ""), 10) + order.shippingFee).toLocaleString("id-ID")}</div>
+                  <div className="order-history-price">
+                    Rp{((parseInt(String(order.item.price || "0").replace(/\D/g, ""), 10) || 0) + order.shippingFee).toLocaleString("id-ID")}
+                  </div>
                 </div>
                 <div className="order-history-item">
                   <div className="product-image-placeholder detail-placeholder" />
