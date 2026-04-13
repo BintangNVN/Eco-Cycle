@@ -1,4 +1,5 @@
 import React from "react";
+import LogoImg from "../assets/images/logo.png"
 
 type AuthLayoutProps = {
   children: React.ReactNode;
@@ -32,17 +33,12 @@ export default function AuthLayout({
 /* ===== LOGO ECO ===== */
 export function AuthEcoLogo() {
   return (
-    <div className="auth-panel-top">
-      <svg
-        className="auth-eco-logo"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#134e4a"
-        strokeWidth="2"
-      >
-        <path d="M12 2a10 10 0 1 0 10 10" />
-        <path d="M12 2v6l4-4" />
-      </svg>
+    <div className="auth-panel-top flex justify-start">
+      <img 
+        src={LogoImg} 
+        alt="EcoCycle Logo" 
+        style={{ width: '80px', height: 'auto', minWidth: 'unset', maxWidth: 'none' }}
+      />
     </div>
   );
 }

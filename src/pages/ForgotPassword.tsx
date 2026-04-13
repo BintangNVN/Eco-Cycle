@@ -57,27 +57,12 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
           />
         </label>
 
-        <PasswordField
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          required
-          minLength={8}
-          autoComplete="new-password"
-        />
-
         <button className="auth-btn-primary" type="submit">
           {loading ? "Resetting..." : "Reset Password"}
         </button>
       </form>
 
       {error && <p className="auth-error">{error}</p>}
-
-      <p className="auth-footer-text">
-        <button type="button" className="auth-link-inline" onClick={onBackToLogin}>
-          Sign in
-        </button>
-      </p>
     </AuthLayout>
   );
 }
