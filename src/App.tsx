@@ -121,7 +121,7 @@ function App() {
     if (window.location.pathname !== canonicalPath) {
       window.history.replaceState(null, "", canonicalPath);
     }
-  }, []);
+  }, [route]);
 
   useEffect(() => {
     const onPopState = () => {
