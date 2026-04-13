@@ -1,5 +1,6 @@
 import React from "react";
 import LogoImg from "../assets/images/logo.png"
+import AuthImg from "../assets/images/auth-image.png"
 
 type AuthLayoutProps = {
   children: React.ReactNode;
@@ -19,10 +20,23 @@ export default function AuthLayout({
 
         <div className={`auth-card ${variant === "full" ? "auth-card--full" : ""}`}>
           
-          {/* kiri hanya untuk register */}
-          {variant === "split" && <div className="auth-card__visual" />}
-
-          {/* kanan (form) */}
+          {/* Image */}
+          {variant === "split" && (
+            <div className="auth-card__visual" style={{ padding: '24px', background: '#fff' }}>
+              <img 
+                src={AuthImg}
+                alt="Register Visual" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover', 
+                  borderRadius: '20px' 
+                }} 
+              />
+            </div>
+          )}
+          
+          {/* Form */}
           <div className="auth-card__panel">{children}</div>
         </div>
       </div>
