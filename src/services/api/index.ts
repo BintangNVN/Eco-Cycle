@@ -49,7 +49,7 @@ async function postWithFallback(
 
 export function login(email: string, password: string): Promise<AxiosResponse<any>> {
   return postWithFallback(
-    ["/login", "/auth/login", "/api/login", "/api/auth/login"],
+    ["/api/auth/login"],
     { email, password }
   );
 }
