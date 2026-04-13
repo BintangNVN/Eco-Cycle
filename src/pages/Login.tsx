@@ -85,7 +85,7 @@ export default function Login({
           value={password}
           onChange={setPassword}
           required
-          minLength={6}
+          // minLength={6}
           autoComplete="current-password"
         />
 
