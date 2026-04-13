@@ -362,6 +362,12 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
             Bogor, Indonesia
           </div>
 
+          {token && (
+            <div className="navbar-user">
+              Hi, {currentUser.name}
+            </div>
+          )}
+
           <button className="navbar-cart">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
@@ -423,6 +429,8 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
 
       {/* MAIN */}
       <div className="main-content">
+        {loading && <div className="dashboard-status">Memuat data pengguna...</div>}
+        {error && <div className="dashboard-status dashboard-error">{error}</div>}
 
         {selectedCategory && selectedCategoryData ? (
           <>

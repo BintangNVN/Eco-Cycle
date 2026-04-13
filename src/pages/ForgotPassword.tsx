@@ -57,6 +57,15 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
           />
         </label>
 
+        <PasswordField
+          label="New Password"
+          value={password}
+          onChange={setPassword}
+          required
+          minLength={6}
+          autoComplete="new-password"
+        />
+
         <button className="auth-btn-primary" type="submit">
           {loading ? "Resetting..." : "Reset Password"}
         </button>
