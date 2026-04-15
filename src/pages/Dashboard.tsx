@@ -297,11 +297,8 @@ export default function Dashboard({ token, onLogout, initialCategoryId, onCatego
 
       {/* MAIN CONTENT */}
       <div className="main-content">
-        {loadingData ? (
-          <div className="empty-state">
-            <p>Memuat data Dashboard...</p>
-          </div>
-        ) : selectedCategory && selectedCategoryData ? (
+
+        {selectedCategory && selectedCategoryData ? (
           <>
             <div className="cat-header">
               <button className="back-btn" onClick={handleCategoryBack}>

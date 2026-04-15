@@ -56,7 +56,7 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
         </label>
 
         <PasswordField
-          label="Password"
+          label="New Password"
           value={password}
           onChange={setPassword}
           required
@@ -69,12 +69,6 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
       </form>
 
       {error && <p className="auth-error">{error}</p>}
-
-      <p className="auth-footer-text">
-        <button type="button" className="auth-link-inline" onClick={onBackToLogin}>
-          Sign in
-        </button>
-      </p>
     </AuthLayout>
   );
 }

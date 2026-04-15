@@ -63,9 +63,21 @@ button {
 }
 
 .auth-card__visual {
-  background: #e8eaeb;
-  min-height: 520px;
-  border-radius: 0;
+  background: #ffffff;
+  padding: 24px; 
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  height: 100%; 
+}
+
+.auth-card__visual img {
+  width: 100%;
+  height: 100%;
+  /* INI KUNCINYA: agar gambar tetap proporsional dan tidak menabrak padding */
+  object-fit: cover; 
+  border-radius: 24px; 
+  display: block;
 }
 
 .auth-card__panel {
