@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || "https://service-capstone-project-production.up.railway.app/api/",
+  baseURL: process.env.REACT_APP_API_BASE_URL || "https://service-capstone-project.vercel.app/api",
 });
 
 api.interceptors.request.use(
@@ -31,13 +31,15 @@ export const register = async (payload: {
   email: string;
   password: string;
   phoneNumber: string;
+  location: string
 }) => {
   return await api.post("/auth/register", {
     name: payload.name, 
     email: payload.email,
     password: payload.password,
     password_confirmation: payload.password, 
-    phoneNumber: payload.phoneNumber
+    phoneNumber: payload.phoneNumber,
+    location: payload.location
   });
 };
 export const logout = async () => {
@@ -83,7 +85,9 @@ export const deletePost = async (id: string) => {
 
 export const updatePost = async (id: string, formData: FormData) => {
   formData.append("_method", "PATCH"); 
-  return await api.post(`/post/${id}/`, formData, {
+  
+  // ✅ HAPUS GARIS MIRING DI AKHIR: `/post/${id}`
+  return await api.post(`/post/${id}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     }
@@ -92,5 +96,9 @@ export const updatePost = async (id: string, formData: FormData) => {
 
 export const getPostDetail = async (id: string) => {
   return await api.get(`/post/${id}`);
+};
+
+export const getMyProfile = async () => {
+  return await api.post('/auth/get-profile');
 };
 export default api;

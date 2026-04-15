@@ -10,9 +10,10 @@ type MyOrdersProps = {
   onLogout?: () => void;
   onMyPost?: () => void;
   onMyOrders?: () => void;
+  onProfile?: () => void;
 };
 
-export default function MyOrders({ orders, onBack, onViewOrderDetail, token, onLogout, onMyPost, onMyOrders }: MyOrdersProps) {
+export default function MyOrders({ orders, onBack, onViewOrderDetail, token, onLogout, onMyPost, onMyOrders, onProfile }: MyOrdersProps) {
   return (
     <div className="order-detail-screen">
       <Navbar
@@ -20,6 +21,7 @@ export default function MyOrders({ orders, onBack, onViewOrderDetail, token, onL
         onLogout={onLogout}
         onMyPost={onMyPost}
         onMyOrders={onMyOrders}
+        onProfile={onProfile}
         showSearch={false}
       />
 

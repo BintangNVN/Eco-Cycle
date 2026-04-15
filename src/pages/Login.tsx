@@ -29,18 +29,31 @@ export default function Login({
 
     try {
       const response = await login(email, password);
-      const token = response.data?.data?.token;
+      
+      // TAMBAHKAN BARIS INI UNTUK MENGINTIP DATA DARI BACKEND
+      console.log("CEK DATA LOGIN:", response.data); 
+      
+      const token = response.data?.data?.token || response.data?.token;
+      // ...
+      const user = response.data?.data?.user; // <-- Menangkap data user
 
       if (!token) {
         throw new Error("Token tidak ditemukan dalam response API");
       }
 
+      // Simpan Token DAN ID User sesuai pilihan "Remember me"
       if (remember) {
         localStorage.setItem("auth_token", token);
+        if (user?.id) localStorage.setItem("user_id", user.id); // Simpan ID
+        
         sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("user_id"); // Bersihkan session
       } else {
         sessionStorage.setItem("auth_token", token);
+        if (user?.id) sessionStorage.setItem("user_id", user.id); // Simpan ID
+        
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_id"); // Bersihkan local
       }
 
       onLoginSuccess(token);
@@ -84,7 +97,6 @@ export default function Login({
           value={password}
           onChange={setPassword}
           required
-          minLength={6}
           autoComplete="current-password"
         />
 

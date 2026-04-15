@@ -149,11 +149,12 @@ const WalletIcon = () => (
 type CheckoutProps = {
   item: NearbyItem | null;
   onBack: () => void;
-  onOrderConfirm?: () => void;
+  onOrderConfirm: () => void;
   token: string | null;
   onLogout?: () => void;
   onMyPost?: () => void;
   onMyOrders?: () => void;
+  onProfile?: () => void; // <--- TAMBAHKAN BARIS INI
 };
 
 type ShippingOption = {

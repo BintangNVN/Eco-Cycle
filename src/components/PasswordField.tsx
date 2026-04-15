@@ -5,7 +5,6 @@ type PasswordFieldProps = {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
-  minLength?: number;
   autoComplete?: string;
 };
 
@@ -14,7 +13,6 @@ export default function PasswordField({
   value,
   onChange,
   required,
-  minLength,
   autoComplete = "current-password",
 }: PasswordFieldProps) {
   const [show, setShow] = useState(false);
@@ -31,7 +29,6 @@ export default function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required={required}
-          minLength={minLength}
           autoComplete={autoComplete}
         />
         <button

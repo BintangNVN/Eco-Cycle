@@ -6,6 +6,7 @@ import OrderConfirmed from "./pages/OrderConfirmed";
 import OrderDetail from "./pages/OrderDetail";
 import MyOrders from "./pages/MyOrders";
 import MyPost from "./pages/MyPost";
+import Profile from "./pages/Profile"; // <-- IMPORT PROFILE
 import type { NearbyItem } from "./pages/ItemDetails";
 import type { Order } from "./types";
 import Landing from "./pages/Landing";
@@ -13,7 +14,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
-type Page = "landing" | "login" | "register" | "forgot-password" | "dashboard" | "items-by-kategori" | "item-details" | "checkout" | "order-confirmed" | "order-detail" | "my-orders" | "my-post";
+// Tambahkan "profile" ke dalam daftar Page
+type Page = "landing" | "login" | "register" | "forgot-password" | "dashboard" | "items-by-kategori" | "item-details" | "checkout" | "order-confirmed" | "order-detail" | "my-orders" | "my-post" | "profile";
 
 type RouteState = {
   page: Page;
@@ -39,6 +41,7 @@ function routeFromPath(pathname: string): RouteState {
   if (path === "/order-detail") return { page: "order-detail" };
   if (path === "/my-orders") return { page: "my-orders" };
   if (path === "/my-post") return { page: "my-post" };
+  if (path === "/profile") return { page: "profile" }; // <-- Tambahan Rute
   if (path === "/login") return { page: "login" };
   if (path === "/register") return { page: "register" };
   if (path === "/forgot-password") return { page: "forgot-password" };
@@ -56,6 +59,7 @@ function pathFromRoute(route: RouteState): string {
   if (route.page === "order-detail") return "/order-detail";
   if (route.page === "my-orders") return "/my-orders";
   if (route.page === "my-post") return "/my-post";
+  if (route.page === "profile") return "/profile"; // <-- Tambahan Rute
   if (route.page === "login") return "/login";
   if (route.page === "register") return "/register";
   if (route.page === "forgot-password") return "/forgot-password";
@@ -69,23 +73,13 @@ function App() {
   const [selectedItem, setSelectedItem] = useState<NearbyItem | null>(() => {
     const saved = window.sessionStorage.getItem("selected_item");
     if (!saved) return null;
-    try {
-      return JSON.parse(saved) as NearbyItem;
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(saved) as NearbyItem; } catch { return null; }
   });
-  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | null>(() => {
-    return window.sessionStorage.getItem("selected_order_number");
-  });
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | null>(() => window.sessionStorage.getItem("selected_order_number"));
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = window.sessionStorage.getItem("order_history");
     if (!saved) return [];
-    try {
-      return JSON.parse(saved) as Order[];
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(saved) as Order[]; } catch { return []; }
   });
 
   const navigateTo = (nextRoute: RouteState, replace = false) => {
@@ -101,17 +95,12 @@ function App() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
     const savedToken = window.localStorage.getItem("auth_token") ?? window.sessionStorage.getItem("auth_token");
 
     if (savedToken) {
       setToken(savedToken);
-      if (
-        route.page === "landing" ||
-        route.page === "login" ||
-        route.page === "register" ||
-        route.page === "forgot-password"
-      ) {
+      if (["landing", "login", "register", "forgot-password"].includes(route.page)) {
         navigateTo({ page: "dashboard" }, true);
       }
       return;
@@ -121,6 +110,7 @@ function App() {
     if (window.location.pathname !== canonicalPath) {
       window.history.replaceState(null, "", canonicalPath);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -138,9 +128,7 @@ function App() {
     navigateTo({ page: "dashboard" });
   };
 
-  const handleRegisterSuccess = () => {
-    navigateTo({ page: "login" });
-  };
+  const handleRegisterSuccess = () => navigateTo({ page: "login" });
 
   const handleViewDetails = (item: NearbyItem) => {
     setSelectedItem(item);
@@ -148,20 +136,14 @@ function App() {
     navigateTo({ page: "item-details" });
   };
 
-  const handleCheckout = () => {
-    navigateTo({ page: "checkout" });
-  };
-
-  const handleCheckoutBack = () => {
-    navigateTo({ page: "item-details" });
-  };
+  const handleCheckout = () => navigateTo({ page: "checkout" });
+  const handleCheckoutBack = () => navigateTo({ page: "item-details" });
 
   const handleOrderConfirm = () => {
     if (!selectedItem) {
       navigateTo({ page: "dashboard" });
       return;
     }
-
     const orderNumber = `#EC-${Date.now().toString().slice(-9)}`;
     const estimatedDate = new Date();
     estimatedDate.setDate(estimatedDate.getDate() + 3);
@@ -169,23 +151,11 @@ function App() {
       orderNumber,
       item: selectedItem,
       status: "Processing",
-      placedAt: new Date().toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      estimatedDelivery: estimatedDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
+      placedAt: new Date().toLocaleString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      estimatedDelivery: estimatedDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       shippingMethod: "Delivery",
       shippingFee: 15000,
-      shippingAddress: {
-        name: "Sarah Nadia",
-        phone: "+62 857 2419 5327",
-        street: "Jl. Palem Putri No. 42, RT. 005/RW. 011, Kel. Pondok Kelapa, Kec. Duren Sawit, Jakarta Timur, DKI Jakarta, 13450",
-      },
+      shippingAddress: { name: "Sarah Nadia", phone: "+62 857 2419 5327", street: "Jl. Palem Putri No. 42, RT. 005/RW. 011, Kel. Pondok Kelapa, Kec. Duren Sawit, Jakarta Timur, DKI Jakarta, 13450" },
     };
 
     setOrders((prev) => {
@@ -199,10 +169,7 @@ function App() {
   };
 
   const handleViewOrderDetail = () => {
-    if (!selectedOrderNumber) {
-      navigateTo({ page: "my-orders" });
-      return;
-    }
+    if (!selectedOrderNumber) { navigateTo({ page: "my-orders" }); return; }
     navigateTo({ page: "order-detail" });
   };
 
@@ -212,29 +179,20 @@ function App() {
     navigateTo({ page: "order-detail" });
   };
 
-  const handleOrderConfirmedContinue = () => {
-    navigateTo({ page: "dashboard" });
-  };
-
-  const handleMyOrders = () => {
-    navigateTo({ page: "my-orders" });
-  };
-
-  const handleMyPost = () => {
-    navigateTo({ page: "my-post" });
-  };
-
-  const handleMyPostBack = () => {
-    navigateTo({ page: "dashboard" });
-  };
-
-  const handleDetailBack = () => {
-    navigateTo({ page: "dashboard" });
-  };
+  const handleOrderConfirmedContinue = () => navigateTo({ page: "dashboard" });
+  
+  // NAVIGASI UTAMA NAVBAR
+  const handleMyOrders = () => navigateTo({ page: "my-orders" });
+  const handleMyPost = () => navigateTo({ page: "my-post" });
+  const handleProfile = () => navigateTo({ page: "profile" }); // <-- Fungsi Baru
+  
+  const handleMyPostBack = () => navigateTo({ page: "dashboard" });
+  const handleDetailBack = () => navigateTo({ page: "dashboard" });
 
   const handleLogout = () => {
     setToken(null);
     window.localStorage.removeItem("auth_token");
+    window.localStorage.removeItem("user_id"); // Bersihkan ID User juga
     window.sessionStorage.removeItem("auth_token");
     navigateTo({ page: "landing" });
   };
@@ -246,23 +204,13 @@ function App() {
   }, [route.page, token]);
 
   return route.page === "landing" ? (
-    <Landing
-      onNavigateToLogin={() => navigateTo({ page: "login" })}
-      onNavigateToRegister={() => navigateTo({ page: "register" })}
-    />
+    <Landing onNavigateToLogin={() => navigateTo({ page: "login" })} onNavigateToRegister={() => navigateTo({ page: "register" })} />
   ) : route.page === "login" ? (
-    <Login
-      onSwitchToRegister={() => navigateTo({ page: "register" })}
-      onLoginSuccess={handleLoginSuccess}
-      onForgotPassword={() => navigateTo({ page: "forgot-password" })}
-    />
+    <Login onSwitchToRegister={() => navigateTo({ page: "register" })} onLoginSuccess={handleLoginSuccess} onForgotPassword={() => navigateTo({ page: "forgot-password" })} />
   ) : route.page === "forgot-password" ? (
     <ForgotPassword onBackToLogin={() => navigateTo({ page: "login" })} />
   ) : route.page === "register" ? (
-    <Register
-      onSwitchToLogin={() => navigateTo({ page: "login" })}
-      onRegisterSuccess={handleRegisterSuccess}
-    />
+    <Register onSwitchToLogin={() => navigateTo({ page: "login" })} onRegisterSuccess={handleRegisterSuccess} />
   ) : route.page === "item-details" ? (
     <ItemDetails 
       item={selectedItem} 
@@ -272,6 +220,7 @@ function App() {
       onLogout={handleLogout}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   ) : route.page === "checkout" ? (
     <Checkout 
@@ -282,6 +231,7 @@ function App() {
       onLogout={handleLogout}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   ) : route.page === "order-confirmed" ? (
     <OrderConfirmed
@@ -292,6 +242,7 @@ function App() {
       onLogout={handleLogout}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   ) : route.page === "order-detail" ? (
     <OrderDetail
@@ -301,6 +252,7 @@ function App() {
       onLogout={handleLogout}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   ) : route.page === "my-orders" ? (
     <MyOrders
@@ -311,24 +263,35 @@ function App() {
       onLogout={handleLogout}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   ) : route.page === "my-post" ? (
-    <MyPost onBack={handleMyPostBack} onViewDetails={handleViewDetails} />
+    <MyPost 
+      token={token}
+      onBack={handleMyPostBack} 
+      onViewDetails={handleViewDetails}
+      onLogout={handleLogout}
+      onProfile={handleProfile} // <-- Pass Prop
+      onMyOrders={handleMyOrders}
+    />
+  ) : route.page === "profile" ? (
+    <Profile 
+      token={token}
+      onBack={handleDetailBack}
+      onLogout={handleLogout}
+      onMyPost={handleMyPost}
+      onMyOrders={handleMyOrders}
+    />
   ) : (
     <Dashboard
       token={token}
       onLogout={handleLogout}
       initialCategoryId={route.page === "items-by-kategori" ? route.categoryId ?? null : null}
-      onCategoryNavigate={(categoryId?: string | null) =>
-        navigateTo(
-          categoryId
-            ? { page: "items-by-kategori", categoryId }
-            : { page: "dashboard" }
-        )
-      }
+      onCategoryNavigate={(categoryId?: string | null) => navigateTo(categoryId ? { page: "items-by-kategori", categoryId } : { page: "dashboard" })}
       onViewDetails={handleViewDetails}
       onMyPost={handleMyPost}
       onMyOrders={handleMyOrders}
+      onProfile={handleProfile} // <-- Pass Prop
     />
   );
 }

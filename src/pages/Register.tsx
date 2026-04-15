@@ -18,12 +18,14 @@ export default function Register({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [location, setLocation] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const nameId = useId();
   const emailId = useId();
   const phoneId = useId();
+  const locationId = useId();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,6 +43,7 @@ export default function Register({
         email,
         password,
         phoneNumber: phoneNumber,
+        location,
       });
 
       alert("Register berhasil, silakan login");
@@ -97,11 +100,24 @@ export default function Register({
           <span className="auth-field__label">Email</span>
           <input
             id={emailId}
-            type="email"
             className="auth-field__input"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+
+        {/* Location */}
+        <label className="auth-field" htmlFor={locationId}>
+          <span className="auth-field__label">Location</span>
+          <input
+            id={locationId}
+            type="text"
+            className="auth-field__input"
+            placeholder="Enter your Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             required
           />
         </label>

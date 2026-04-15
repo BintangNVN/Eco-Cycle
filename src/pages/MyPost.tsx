@@ -1,22 +1,18 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { NearbyItem } from "./ItemDetails";
-import type { ReactNode } from "react";
 import "../styles/css/dashboard.css";
 
-// IMPORT API
+// IMPORT KOMPONEN NAVBAR & API
+import Navbar from "../components/Navbar"; 
 import api, { getMyPosts, createPost, getCategories } from "../services/api/api"; 
 
 type MyPostProps = {
+  token: string | null;
   onBack: () => void;
+  onLogout: () => void;
+  onProfile?: () => void;
+  onMyOrders?: () => void;
   onViewDetails: (item: NearbyItem) => void;
-};
-
-type Category = {
-  id: string;
-  label: string;
-  emoji: string;
-  icon: string;
-  iconComponent?: ReactNode;
 };
 
 interface ExtendNearbyItem extends Omit<NearbyItem, 'weight'> {
@@ -26,18 +22,13 @@ interface ExtendNearbyItem extends Omit<NearbyItem, 'weight'> {
   poitRewards?: number | string;
   image?: string[]; 
   category?: { id: string; name: string };
+  categoryId?: string;
   condition?: string;
   weight?: number | string;
+  price?: number | string;
   description?: string;
+  location?: string;
 }
-
-// === SVG ICONS ===
-const PlasticIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 2h10l2 7H5l2-7z"/><rect x="5" y="9" width="14" height="11" rx="1"/><line x1="12" y1="9" x2="12" y2="20"/><circle cx="9" cy="15" r="0.5" fill="currentColor"/><circle cx="15" cy="15" r="0.5" fill="currentColor"/></svg>);
-const GlassIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 3h12l-1 8c0 2-1 3-5 3s-5-1-5-3L6 3z"/><line x1="8" y1="14" x2="16" y2="14"/><path d="M7 14l-1 6c0 1 1 2 2 2h8c1 0 2-1 2-2l-1-6"/></svg>);
-const TinIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="6" y="4" width="12" height="14" rx="1"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><path d="M9 2h6v2H9z"/><line x1="8" y1="19" x2="16" y2="19"/><line x1="9" y1="22" x2="15" y2="22"/></svg>);
-const CardboardIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 3l18 18"/><path d="M21 3L3 21"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>);
-const PatchworkIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/><line x1="3" y1="11" x2="21" y2="11"/><line x1="11" y1="3" x2="11" y2="21"/></svg>);
-const PaperIcon = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="5" y="2" width="14" height="20" rx="1"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg>);
 
 const conditions = [
   { label: "Bekas Bagus", value: "good" },
@@ -45,12 +36,18 @@ const conditions = [
   { label: "Bekas Rusak", value: "bad" }
 ];
 
-const initialForm = { title: "", condition: "", categoryId: "", weight: "", points: "", description: "" };
+// Form bawaan dikosongkan saat tambah baru
+const initialForm = { title: "", condition: "", categoryId: "", weight: "", points: "", price: "", description: "", location: "" };
 
 function ItemCard({ item, onEdit, onDelete }: { item: ExtendNearbyItem; onEdit: (item: ExtendNearbyItem) => void; onDelete: (id: string) => void; }) {
   const displayTitle = item.name || item.label || item.title || "Untitled Product";
-  const backendBaseUrl = "https://service-capstone-project-production.up.railway.app";
-  let imageUrl = (item.image && item.image[0]) ? (item.image[0].startsWith("http") ? item.image[0] : `${backendBaseUrl}${item.image[0]}`) : "";
+  const imageBaseUrl = "https://service-capstone-project.vercel.app";
+  
+  let imageUrl = (item.image && item.image[0]) 
+    ? (item.image[0].startsWith("http") 
+        ? item.image[0] 
+        : `${imageBaseUrl}${item.image[0].startsWith('/') ? '' : '/'}${item.image[0]}`) 
+    : "";
 
   return (
     <div className="item-card">
@@ -65,6 +62,7 @@ function ItemCard({ item, onEdit, onDelete }: { item: ExtendNearbyItem; onEdit: 
         <div className="card-title">{displayTitle}</div>
       </div>
       <div className="card-footer" style={{ gap: "8px" }}>
+        {/* Tombol Edit ini akan mengirim seluruh data item (termasuk item.id) ke fungsi handleEdit */}
         <button className="btn-outline" style={{ flex: 1, padding: "8px" }} onClick={() => onEdit(item)}>Edit</button>
         <button className="btn-primary" style={{ flex: 1, padding: "8px", backgroundColor: "#dc3545", borderColor: "#dc3545" }} onClick={() => onDelete(item.id)}>Delete</button>
       </div>
@@ -72,7 +70,7 @@ function ItemCard({ item, onEdit, onDelete }: { item: ExtendNearbyItem; onEdit: 
   );
 }
 
-export default function MyPost({ onBack }: MyPostProps) {
+export default function MyPost({ token, onBack, onLogout, onProfile, onMyOrders, onViewDetails }: MyPostProps) { 
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -109,14 +107,19 @@ export default function MyPost({ onBack }: MyPostProps) {
   };
 
   const handleEdit = (item: ExtendNearbyItem) => {
+    // 1. KITA AMBIL ID POSTINGAN DI SINI
     setEditId(item.id);
+    
+    // 2. KITA MASUKKAN DATA LAMA KE DALAM FORM
     setFormData({
-      title: item.name || item.title || "",
+      title: item.name || item.label || "",
       condition: item.condition || "",
       categoryId: item.categoryId || "",
       weight: String(item.weight || ""),
       points: String(item.poitRewards || ""),
-      description: item.description || ""
+      price: String(item.price || "0"),
+      description: item.description || "",
+      location: item.location || ""
     });
     setShowCreatePost(true);
   };
@@ -132,29 +135,39 @@ export default function MyPost({ onBack }: MyPostProps) {
       submitData.append("categoryId", formData.categoryId); 
       submitData.append("weight", formData.weight);
       submitData.append("poitRewards", formData.points); 
+      submitData.append("price", formData.price); 
       submitData.append("description", formData.description);
+      
+      // Kirim lokasi kalau backend kamu menerimanya, kalau tidak, hapus saja baris ini:
+      if (formData.location) submitData.append("location", formData.location);
       
       if (imageFiles.length > 0) {
         imageFiles.forEach((file) => submitData.append("image", file));
       }
 
       if (editId) {
-        submitData.append("_method", "PATCH");
-        await api.post(`/post/${editId}`, submitData);
+        // 1. KITA HAPUS BARIS INI KARENA NGGAK PERLU SPOOFING
+        // submitData.append("_method", "PATCH"); 
+        
+        // 2. GANTI api.post MENJADI api.patch
+        await api.patch(`/post/${editId}`, submitData); 
+        
         window.alert("Postingan berhasil diperbarui!");
       } else {
         await createPost(submitData);
         window.alert("Postingan berhasil dibuat!");
       }
 
+      // Bersihkan form setelah sukses
       setShowCreatePost(false);
       setEditId(null);
       setFormData(initialForm);
       setImageFiles([]);
       setImagePreviews([]);
       fetchPosts();
-    } catch (error) { 
-      window.alert("Gagal memproses postingan. Periksa koneksi atau data."); 
+    } catch (error: any) { 
+      console.error(error.response?.data);
+      window.alert("Gagal memproses postingan. Cek Console untuk detail error."); 
     } finally { setSubmitLoading(false); }
   };
 
@@ -164,17 +177,25 @@ export default function MyPost({ onBack }: MyPostProps) {
 
   return (
     <div className="eco-app">
-      <nav className="navbar">
-        <div className="navbar-logo" onClick={onBack} style={{cursor: 'pointer'}}>EcoCycle</div>
-        <div className="navbar-search">
-          <input type="search" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search your posts..." />
-        </div>
-      </nav>
+      <Navbar 
+        token={token}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onLogout={onLogout}
+        onProfile={onProfile}
+        onMyOrders={onMyOrders}
+        showSearch={true}
+      />
 
       {showCreatePost ? (
         <div className="main-content create-post-page">
           <div className="cat-header">
-            <button className="back-btn" onClick={() => { setShowCreatePost(false); setEditId(null); setFormData(initialForm); setImagePreviews([]); }}>Back</button>
+            <button className="back-btn" onClick={() => { setShowCreatePost(false); setEditId(null); setFormData(initialForm); setImagePreviews([]); }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{marginRight: '6px'}}>
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              Back
+            </button>
             <div className="section-title">{editId ? "Edit Post" : "Add New Post"}</div>
           </div>
           <form className="create-post-grid" onSubmit={handleCreatePost}>
@@ -222,6 +243,11 @@ export default function MyPost({ onBack }: MyPostProps) {
                 <div className="form-group">
                   <label>Points Reward</label>
                   <input className="form-input" type="number" value={formData.points} onChange={e => setFormData({...formData, points: e.target.value})} required />
+                </div>
+                {/* ⭐️ SAYA TAMBAHKAN KOTAK INPUT PRICE DI SINI AGAR BISA DIEDIT ⭐️ */}
+                <div className="form-group">
+                  <label>Price (Rp)</label>
+                  <input className="form-input" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
                 </div>
               </div>
 

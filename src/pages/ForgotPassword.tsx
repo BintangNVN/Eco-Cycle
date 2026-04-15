@@ -60,7 +60,6 @@ export default function ForgotPassword({ onBackToLogin }: ForgotPasswordProps) {
           value={password}
           onChange={setPassword}
           required
-          minLength={8}
           autoComplete="new-password"
         />
 

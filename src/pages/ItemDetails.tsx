@@ -4,7 +4,6 @@ import img1 from "../assets/images/daurulang.jpg";
 import img2 from "../assets/images/jualsampah.jpg";
 import img3 from "../assets/images/kebersihanlingkungan.jpg";
 
-// 1. UPDATE INTERFACE: Sesuaikan dengan struktur data dari Backend Railway
 export type NearbyItem = {
   id: string;
   title?: string;
@@ -21,6 +20,10 @@ export type NearbyItem = {
   condition?: string;
   description?: string;
   image?: string[] | string;
+  user?: { 
+    id: string;
+    name: string; 
+  };
 };
 
 type ItemDetailsProps = {
@@ -31,6 +34,7 @@ type ItemDetailsProps = {
   onLogout?: () => void;
   onMyPost?: () => void;
   onMyOrders?: () => void;
+  onProfile?: () => void;
 };
 
 // Fungsi fallback jika user tidak mengunggah gambar
@@ -88,7 +92,7 @@ export default function ItemDetails({ item, onBack, onCheckout, token, onLogout,
   const displayDesc = item.description || "Tidak ada deskripsi detail untuk item ini.";
 
   // 5. Logika URL Gambar (Sama seperti ItemCard di MyPost)
-  const backendBaseUrl = "https://service-capstone-project-production.up.railway.app";
+  const imageBaseUrl = "https://service-capstone-project.vercel.app"; 
   let mainImageUrl = "";
   let allImages: string[] = [];
 
@@ -99,7 +103,8 @@ export default function ItemDetails({ item, onBack, onCheckout, token, onLogout,
     // Konversi semua relative path menjadi URL lengkap
     allImages = rawImages.map(path => {
       if (path.startsWith("http")) return path;
-      return path.startsWith("/") ? `${backendBaseUrl}${path}` : `${backendBaseUrl}/${path}`;
+      // Gunakan imageBaseUrl yang baru
+      return path.startsWith("/") ? `${imageBaseUrl}${path}` : `${imageBaseUrl}/${path}`;
     });
 
     if (allImages.length > 0) {
@@ -138,14 +143,12 @@ export default function ItemDetails({ item, onBack, onCheckout, token, onLogout,
               className="item-details-image-main"
               style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '12px' }}
               onError={(e) => {
-                // Jika URL backend mati/error, ganti ke gambar darurat
                 (e.target as HTMLImageElement).src = img1;
               }}
             />
           </div>
 
           <div className="item-details-thumbs">
-            {/* Tampilkan thumbnail dinamis jika gambar > 1, jika tidak pakai 3 kotak dummy */}
             {allImages.length > 1 ? (
               allImages.slice(0, 3).map((img, index) => (
                 <button
@@ -199,10 +202,11 @@ export default function ItemDetails({ item, onBack, onCheckout, token, onLogout,
           </button>
 
           <div className="item-details-seller-card">
-            <div className="item-details-seller-avatar">E</div>
+            <div className="item-details-seller-avatar">
+              {item.user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
             <div>
-              <div className="item-details-seller-name">EcoCycle User</div>
-              <div className="item-details-seller-status">Active</div>
+              <div className="item-details-seller-name">{item.user?.name}</div>
             </div>
           </div>
 

@@ -10,6 +10,7 @@ type OrderConfirmedProps = {
   onLogout?: () => void;
   onMyPost?: () => void;
   onMyOrders?: () => void;
+  onProfile?: () => void;
 };
 
 export default function OrderConfirmed({

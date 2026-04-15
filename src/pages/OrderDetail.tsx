@@ -9,6 +9,7 @@ type OrderDetailProps = {
   onLogout?: () => void;
   onMyPost?: () => void;
   onMyOrders?: () => void;
+  onProfile?: () => void;
 };
 
 const statusSteps = ["Processing", "Packed", "Out for Delivery", "Delivered"] as const;
